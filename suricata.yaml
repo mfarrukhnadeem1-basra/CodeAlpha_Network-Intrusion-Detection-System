@@ -1,0 +1,70 @@
+%YAML 1.1
+---
+# Basic Suricata configuration for IDS monitoring on Windows.
+
+vars:
+  address-groups:
+    HOME_NET: "[192.168.0.0/16,10.0.0.0/8]"
+    EXTERNAL_NET: "[!HOME_NET]"
+
+logging:
+  default-log-level: INFO
+  outputs:
+    - console:
+        enabled: yes
+    - file:
+        enabled: yes
+        filename: logs/suricata.log
+  stats:
+    enabled: yes
+    filename: logs/stats.log
+
+outputs:
+  - fast:
+      enabled: yes
+      filename: logs/fast.log
+  - eve-log:
+      enabled: yes
+      filetype: regular
+      filename: logs/eve.json
+      types:
+        - alert
+        - http
+        - dns
+        - tls
+        - flow
+
+pcap:
+  enabled: yes
+  # Suricata on Windows typically relies on pcap for packet capture.
+
+rule-files:
+  - rules/local.rules
+
+detect:
+  profile: medium
+  libhtp:
+    default-config:
+      use-mmap: yes
+
+stream:
+  reassembly:
+    memcap: 64mb
+    depth: 1mb
+
+host-os-policy:
+  windows:
+    checksum-validation: no
+
+app-layer:
+  protocols:
+    http:
+      enabled: yes
+    tls:
+      enabled: yes
+    dns:
+      enabled: yes
+
+stats:
+  enabled: yes
+  filename: logs/stats.log
